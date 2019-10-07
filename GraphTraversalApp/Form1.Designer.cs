@@ -71,6 +71,7 @@ namespace GraphTraversalApp
             this.dfsButton.TabIndex = 3;
             this.dfsButton.Text = "DFS";
             this.dfsButton.UseVisualStyleBackColor = true;
+            this.dfsButton.Click += new System.EventHandler(this.DfsButtonClick);
             // 
             // resetGraphButton
             // 

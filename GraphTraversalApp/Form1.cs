@@ -5,6 +5,9 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.Windows.Forms;
+    using System.Linq;
+    using System.Threading;
+
     public partial class GraphTraversalForm : Form
     {
         //Global variable to hold the graph 
@@ -24,6 +27,9 @@
 
         //Global list to hold the graphic associated with each node in the graph
         List<Rectangle> nodesCircles = new List<Rectangle>();
+
+        //Global variable to hold the route taken during an algorithm, route can then be displayed in the app
+        List<string> route = new List<string>();
 
         //Global to hold the name of the start node, by default the startNode will be A (index 0)
         int startNodeIndex = 0;
@@ -49,66 +55,6 @@
 
             //Change prompt label
             promptLabel.Text = "Now click a start node";
-        }
-
-        private void BfsButtonClick(object sender, EventArgs e)
-        {
-            ////Instantiate list to hold the route taken and add start node
-            //List<string> route = new List<string>();
-            //route.Add(startNode);
-
-            ////Keep track of position within the graph
-            //Node currentNode = null;
-
-            ////Try assign the first node to currentNode
-            //try
-            //{
-            //    currentNode = graph.NodeList.Find(x => x.Name == startNode);
-            //}
-            //catch (Exception)
-            //{
-            //    Console.WriteLine("Invalid start node, please input a valid node name");
-            //}
-
-            ////Instantiate the stack to keep track of node exploration
-            //Stack<Node> nodeStack = new Stack<Node>();
-
-            ////Run until every node is in the route
-            //while (route.Count != graph.NoNodes)
-            //{
-            //    //Variable to hold the number of neighbouring nodes which have already been explored, reset when we have new node
-            //    int redundantCount = 0;
-
-            //    //Sort the edge list so that the nodes will be added to the route according to which is closest
-            //    var sortedEdgeDict = from entry in currentNode.EdgeList orderby entry.Value ascending select entry;
-            //    foreach (var edge in sortedEdgeDict)
-            //    {
-            //        //Run through the edge list, when an unvisited node is found, visit it and push current to stack
-            //        if (!route.Contains(edge.Key.Name))
-            //        {
-            //            //Add it to the route
-            //            route.Add(edge.Key.Name);
-            //            //Push current to stack for later exploration
-            //            nodeStack.Push(currentNode);
-            //            //Assign the newly visited node to be the current node
-            //            currentNode = edge.Key;
-            //            //Break out of this since we now have a new node to explore from
-            //            break;
-            //        }
-            //        //If its already in the route, increment redundantCount
-            //        else
-            //        {
-            //            redundantCount++;
-            //            //If every neighbouring node is visited, then we should revert back to the top element of the stack
-            //            if (redundantCount == sortedEdgeDict.Count())
-            //            {
-            //                currentNode = nodeStack.Pop();
-            //                break;
-            //            }
-            //        }
-            //    }
-
-            //}
         }
         //Generate and illustrate a new random(ish) graph with between 7 - 10 nodes
         private void GraphPanelPaintGraph(object sender, PaintEventArgs e)
@@ -253,6 +199,129 @@
             g.FillEllipse(unvisitedBrush, nodesCircles[nodeIndex]);
             g.DrawString(graph.NodeList[nodeIndex].Name, new Font(this.Font, FontStyle.Bold), blackBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y + 4);
         }
-        
+        //Perform the Bredth-first search on the graph from the selected start index
+        private void BfsButtonClick(object sender, EventArgs e)
+        {
+            //Initialise the list to hold the route taken and put the start node in
+            List<string> route = new List<string>();
+            route.Add(graph.NodeList[startNodeIndex].Name);
+
+            //Update the label to display the route taken through the graph
+            promptLabel.Text = $"Route: {route[0]} => ";
+
+            //Keep track of the current position within the graph
+            Node currentNode = graph.NodeList[startNodeIndex];
+
+            //Queue to hold the order of nodes to be explored, then enqueue the start node
+            Queue<Node> nodeQueue = new Queue<Node>();
+            nodeQueue.Enqueue(currentNode);
+
+            //Run until the route includes all nodes
+            while (route.Count != graph.NoNodes)
+            {
+                //Sort the edge list so that the nodes will be added to the route according to which is closest
+                var sortedEdgeDict = from entry in currentNode.EdgeList orderby entry.Value ascending select entry;
+                foreach (var edge in sortedEdgeDict)
+                {
+                    //Any nodes visible from current node which aren't in the route should be added since BFS
+                    if (!route.Contains(edge.Key.Name))
+                    {
+                        route.Add(edge.Key.Name);
+                        nodeQueue.Enqueue(edge.Key);
+
+                        //Paint the visited node green
+                        PaintVisited(edge.Key.Index);
+
+                        //Append the route taken to the label as the route is being taken
+                        if(route.Count == graph.NoNodes)
+                        {
+                            promptLabel.Text += edge.Key.Name;
+                        }
+                        else
+                        {
+                            promptLabel.Text += edge.Key.Name + " => ";
+                        }
+                        promptLabel.Update();
+                        //Artifical delay for enhanced visuals
+                        Thread.Sleep(500);
+                    }
+                }
+                //Deque the current node since its fully explored
+                nodeQueue.Dequeue();
+                //Assign next node in queue to be next to be explored
+                currentNode = nodeQueue.Peek();
+            }
+        }
+        //Perform the Depth-first search on the graph
+        private void DfsButtonClick(object sender, EventArgs e)
+        {
+            //Instantiate list to hold the route taken and add start node
+            List<string> route = new List<string>();
+            route.Add(graph.NodeList[startNodeIndex].Name);
+
+            //Update the label to display the route taken through the graph
+            promptLabel.Text = $"Route: {route[0]} => ";
+
+            Node currentNode = graph.NodeList[startNodeIndex];
+
+            //Instantiate the stack to keep track of node exploration
+            Stack<Node> nodeStack = new Stack<Node>();
+
+            //Run until every node is in the route
+            while (route.Count != graph.NoNodes)
+            {
+                //Variable to hold the number of neighbouring nodes which have already been explored, reset when we have new node
+                int redundantCount = 0;
+
+                //Sort the edge list using Linq so that the nodes will be added to the route according to which is closest
+                var sortedEdgeDict = from entry in currentNode.EdgeList orderby entry.Value ascending select entry;
+
+                //Loop through currentNodes edge list, adding all to the route, accounting for edge weights by visiting closest first
+                foreach (var edge in sortedEdgeDict)
+                {
+                    //Run through the edge list, when an unvisited node is found, visit it and push current to stack
+                    if (!route.Contains(edge.Key.Name))
+                    {
+                        //Add it to the route
+                        route.Add(edge.Key.Name);
+                        //Push current to stack for later exploration
+                        nodeStack.Push(currentNode);
+                        //Assign the newly visited node to be the current node
+                        currentNode = edge.Key;
+
+                        //Paint the visited node green
+                        PaintVisited(edge.Key.Index);
+
+                        //Append the route taken to the label as the route is being taken
+                        if (route.Count == graph.NoNodes)
+                        {
+                            promptLabel.Text += edge.Key.Name;
+                        }
+                        else
+                        {
+                            promptLabel.Text += edge.Key.Name + " => ";
+                        }
+                        promptLabel.Update();
+                        //Artifical delay for enhanced visuals
+                        Thread.Sleep(500);
+
+                        //Break out of this since we now have a new node to explore from
+                        break;
+                    }
+                    //If its already in the route, increment redundantCount
+                    else
+                    {
+                        redundantCount++;
+                        //If every neighbouring node is visited, then we should revert back to the top element of the stack
+                        if (redundantCount == sortedEdgeDict.Count())
+                        {
+                            currentNode = nodeStack.Pop();
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
     }
 }
