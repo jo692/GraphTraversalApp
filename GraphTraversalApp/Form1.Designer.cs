@@ -82,6 +82,7 @@ namespace GraphTraversalApp
             this.resetGraphButton.TabIndex = 4;
             this.resetGraphButton.Text = "Reset Graph";
             this.resetGraphButton.UseVisualStyleBackColor = true;
+            this.resetGraphButton.Click += new System.EventHandler(this.ResetGraphButtonClick);
             // 
             // buttonPanel
             // 

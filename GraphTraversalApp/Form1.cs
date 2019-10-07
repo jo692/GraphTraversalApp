@@ -206,6 +206,9 @@
             List<string> route = new List<string>();
             route.Add(graph.NodeList[startNodeIndex].Name);
 
+            //In the event the user hasn't clicked a start node, highlight the default start node 
+            PaintVisited(startNodeIndex);
+
             //Update the label to display the route taken through the graph
             promptLabel.Text = $"Route: {route[0]} => ";
 
@@ -258,6 +261,9 @@
             //Instantiate list to hold the route taken and add start node
             List<string> route = new List<string>();
             route.Add(graph.NodeList[startNodeIndex].Name);
+
+            //In the event the user hasn't clicked a start node, highlight the default start node 
+            PaintVisited(startNodeIndex);
 
             //Update the label to display the route taken through the graph
             promptLabel.Text = $"Route: {route[0]} => ";
@@ -321,6 +327,15 @@
                     }
                 }
 
+            }
+        }
+        //Reset the graph back to its unvisited state so another algorithm can be performed on it
+        private void ResetGraphButtonClick(object sender, EventArgs e)
+        {
+            promptLabel.Text = "Now choose a start node";
+            for (int i = 0; i < graph.NoNodes; i++)
+            {
+                PaintUnvisited(i);
             }
         }
     }
