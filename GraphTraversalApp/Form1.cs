@@ -16,22 +16,18 @@
         //Enables the GraphPanelPaintGraph function to execute upon the New Graph button being pressed
         bool newGraphButtonClicked = false;
 
-        //Global variable for a random number generator
-        Random rng = new Random();
-
-        //Some of these may move from global in the future
+        //Brushes used in multiple functions
         Brush unvisitedBrush = new SolidBrush(Color.Crimson);
         Brush visitedBrush = new SolidBrush(Color.Lime);
         Brush blackBrush = new SolidBrush(Color.Black);
-        Pen blackPen = new Pen(Color.Black, 3);
-
+        
         //Global list to hold the graphic associated with each node in the graph
         List<Rectangle> nodesCircles = new List<Rectangle>();
 
         //Global variable to hold the route taken during an algorithm, route can then be displayed in the app
         List<string> route = new List<string>();
 
-        //Global to hold the name of the start node, by default the startNode will be A (index 0)
+        //Global to hold the index of the start node, by default the startNode will be A (index 0)
         int startNodeIndex = 0;
 
         public GraphTraversalForm()
@@ -59,14 +55,23 @@
         //Generate and illustrate a new random(ish) graph with between 7 - 10 nodes
         private void GraphPanelPaintGraph(object sender, PaintEventArgs e)
         {
+            //Ensure new graph is only drawn upon button click
             if (newGraphButtonClicked)
             {
+                //Random number generator used to decide number of nodes and edge weights
+                Random rng = new Random();
+
+                //Black pen used to draw the outlines of the nodes, need not be global since the nodes are only drawn once here
+                Pen blackPen = new Pen(Color.Black, 3);
+
+                //Initialise graphics on the graphPanel, then clear any previous graph illustrations
                 Graphics g = graphPanel.CreateGraphics();
                 g.Clear(Color.White);
 
                 //String array to hold the names of the nodes
                 string[] nodeNames = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
 
+                //Generate the number of nodes for the current configuration
                 int numberOfNodes = rng.Next(7, 11);
 
                 //Holds the placement of the nodes when drawing
@@ -101,6 +106,7 @@
                     {
                         y -= 80;
                     }
+                    //Odd i places the node on the bottom row
                     else
                     {
                         y += 80;
@@ -126,6 +132,7 @@
                         //Each node can have between 1 and 2 forward edges (A can only have edges to B or C, therefore the max edges for a node is 4)
                         for (int k = 1; k < rng.Next(2, 4); k++)
                         {
+                            edgeWeight = rng.Next(5, 51);
                             graph.AddEdge(graph, j, j + k, edgeWeight);
 
                             //Draw this edge using the position of the nodes
@@ -146,7 +153,7 @@
                 }
                 for (int i = 0; i < graph.NoNodes; i++)
                 {
-                    g.FillEllipse(unvisitedBrush, nodesCircles[i]);
+                    PaintUnvisited(i);
                     //Draw the node name inside the cirle
                     g.DrawString(nodeNames[i], new Font(this.Font, FontStyle.Bold), blackBrush, nodesCircles[i].X + 4, nodesCircles[i].Y + 4);
                 }
@@ -180,7 +187,7 @@
                     //Change the colour of the start node to green
                     PaintVisited(startNodeIndex);
                     //Change the prompt label text
-                    promptLabel.Text = $"Choose a search...";
+                    promptLabel.Text = "Choose a search...";
                 }
             }
         }
@@ -199,7 +206,7 @@
             g.FillEllipse(unvisitedBrush, nodesCircles[nodeIndex]);
             g.DrawString(graph.NodeList[nodeIndex].Name, new Font(this.Font, FontStyle.Bold), blackBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y + 4);
         }
-        //Perform the Bredth-first search on the graph from the selected start index
+        //Perform the Breadth-first search on the graph from the selected start index
         private void BfsButtonClick(object sender, EventArgs e)
         {
             //Initialise the list to hold the route taken and put the start node in

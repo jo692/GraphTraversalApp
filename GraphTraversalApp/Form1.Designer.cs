@@ -38,6 +38,7 @@ namespace GraphTraversalApp
             this.buttonPanel = new System.Windows.Forms.Panel();
             this.graphPanel = new System.Windows.Forms.Panel();
             this.promptLabel = new System.Windows.Forms.Label();
+            this.buttonPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // bfsButton
@@ -54,9 +55,9 @@ namespace GraphTraversalApp
             // newGraphButton
             // 
             this.newGraphButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.newGraphButton.Location = new System.Drawing.Point(254, 399);
+            this.newGraphButton.Location = new System.Drawing.Point(237, 7);
             this.newGraphButton.Name = "newGraphButton";
-            this.newGraphButton.Size = new System.Drawing.Size(128, 39);
+            this.newGraphButton.Size = new System.Drawing.Size(144, 39);
             this.newGraphButton.TabIndex = 1;
             this.newGraphButton.Text = "New Graph";
             this.newGraphButton.UseVisualStyleBackColor = true;
@@ -76,9 +77,9 @@ namespace GraphTraversalApp
             // resetGraphButton
             // 
             this.resetGraphButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.resetGraphButton.Location = new System.Drawing.Point(419, 399);
+            this.resetGraphButton.Location = new System.Drawing.Point(410, 7);
             this.resetGraphButton.Name = "resetGraphButton";
-            this.resetGraphButton.Size = new System.Drawing.Size(128, 39);
+            this.resetGraphButton.Size = new System.Drawing.Size(144, 39);
             this.resetGraphButton.TabIndex = 4;
             this.resetGraphButton.Text = "Reset Graph";
             this.resetGraphButton.UseVisualStyleBackColor = true;
@@ -87,6 +88,8 @@ namespace GraphTraversalApp
             // buttonPanel
             // 
             this.buttonPanel.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.buttonPanel.Controls.Add(this.resetGraphButton);
+            this.buttonPanel.Controls.Add(this.newGraphButton);
             this.buttonPanel.Location = new System.Drawing.Point(5, 392);
             this.buttonPanel.Name = "buttonPanel";
             this.buttonPanel.Size = new System.Drawing.Size(790, 52);
@@ -120,19 +123,18 @@ namespace GraphTraversalApp
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.graphPanel);
             this.Controls.Add(this.promptLabel);
-            this.Controls.Add(this.resetGraphButton);
             this.Controls.Add(this.dfsButton);
-            this.Controls.Add(this.newGraphButton);
             this.Controls.Add(this.bfsButton);
             this.Controls.Add(this.buttonPanel);
-            this.Controls.Add(this.graphPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "GraphTraversalForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Graph Traversal App";
+            this.buttonPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
