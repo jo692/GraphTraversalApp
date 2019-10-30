@@ -54,6 +54,9 @@
     </Compile>
     <Compile Include="GraphObjects\Node.cs" />
     <Compile Include="GraphObjects\Graph.cs" />
+    <Compile Include="Heaps\HeapNode.cs" />
+    <Compile Include="Heaps\HeapTree.cs" />
+    <Compile Include="Heaps\MinHeap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">

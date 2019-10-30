@@ -38,13 +38,14 @@ namespace GraphTraversalApp
             this.buttonPanel = new System.Windows.Forms.Panel();
             this.graphPanel = new System.Windows.Forms.Panel();
             this.promptLabel = new System.Windows.Forms.Label();
+            this.dijkstraButton = new System.Windows.Forms.Button();
             this.buttonPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // bfsButton
             // 
             this.bfsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bfsButton.Location = new System.Drawing.Point(13, 399);
+            this.bfsButton.Location = new System.Drawing.Point(198, 7);
             this.bfsButton.Name = "bfsButton";
             this.bfsButton.Size = new System.Drawing.Size(128, 39);
             this.bfsButton.TabIndex = 0;
@@ -55,7 +56,7 @@ namespace GraphTraversalApp
             // newGraphButton
             // 
             this.newGraphButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.newGraphButton.Location = new System.Drawing.Point(237, 7);
+            this.newGraphButton.Location = new System.Drawing.Point(8, 7);
             this.newGraphButton.Name = "newGraphButton";
             this.newGraphButton.Size = new System.Drawing.Size(144, 39);
             this.newGraphButton.TabIndex = 1;
@@ -66,7 +67,7 @@ namespace GraphTraversalApp
             // dfsButton
             // 
             this.dfsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.dfsButton.Location = new System.Drawing.Point(660, 399);
+            this.dfsButton.Location = new System.Drawing.Point(466, 7);
             this.dfsButton.Name = "dfsButton";
             this.dfsButton.Size = new System.Drawing.Size(128, 39);
             this.dfsButton.TabIndex = 3;
@@ -77,7 +78,7 @@ namespace GraphTraversalApp
             // resetGraphButton
             // 
             this.resetGraphButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.resetGraphButton.Location = new System.Drawing.Point(410, 7);
+            this.resetGraphButton.Location = new System.Drawing.Point(639, 7);
             this.resetGraphButton.Name = "resetGraphButton";
             this.resetGraphButton.Size = new System.Drawing.Size(144, 39);
             this.resetGraphButton.TabIndex = 4;
@@ -88,6 +89,9 @@ namespace GraphTraversalApp
             // buttonPanel
             // 
             this.buttonPanel.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.buttonPanel.Controls.Add(this.dijkstraButton);
+            this.buttonPanel.Controls.Add(this.dfsButton);
+            this.buttonPanel.Controls.Add(this.bfsButton);
             this.buttonPanel.Controls.Add(this.resetGraphButton);
             this.buttonPanel.Controls.Add(this.newGraphButton);
             this.buttonPanel.Location = new System.Drawing.Point(5, 392);
@@ -117,6 +121,17 @@ namespace GraphTraversalApp
             this.promptLabel.Text = "Click \'New Graph\' to get started";
             this.promptLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // dijkstraButton
+            // 
+            this.dijkstraButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.dijkstraButton.Location = new System.Drawing.Point(332, 7);
+            this.dijkstraButton.Name = "dijkstraButton";
+            this.dijkstraButton.Size = new System.Drawing.Size(128, 39);
+            this.dijkstraButton.TabIndex = 5;
+            this.dijkstraButton.Text = "Dijkstra";
+            this.dijkstraButton.UseVisualStyleBackColor = true;
+            this.dijkstraButton.Click += new System.EventHandler(this.DijkstraButtonClick);
+            // 
             // GraphTraversalForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -125,8 +140,6 @@ namespace GraphTraversalApp
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.graphPanel);
             this.Controls.Add(this.promptLabel);
-            this.Controls.Add(this.dfsButton);
-            this.Controls.Add(this.bfsButton);
             this.Controls.Add(this.buttonPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -148,6 +161,7 @@ namespace GraphTraversalApp
         private System.Windows.Forms.Panel buttonPanel;
         private System.Windows.Forms.Panel graphPanel;
         private System.Windows.Forms.Label promptLabel;
+        private System.Windows.Forms.Button dijkstraButton;
     }
 }
 

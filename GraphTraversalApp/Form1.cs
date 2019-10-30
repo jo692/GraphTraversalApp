@@ -7,6 +7,8 @@
     using System.Windows.Forms;
     using System.Linq;
     using System.Threading;
+    using GraphTraversalApp.Heaps;
+    using System.Diagnostics;
 
     public partial class GraphTraversalForm : Form
     {
@@ -15,6 +17,8 @@
 
         //Enables the GraphPanelPaintGraph function to execute upon the New Graph button being pressed
         bool newGraphButtonClicked = false;
+        //If the dijkstra button is pressed, this will direct the flow of the program accordingly through the GraphPanelMouseClick function
+        bool dijkstraButtonClicked = false;
 
         //Brushes used in multiple functions
         Brush unvisitedBrush = new SolidBrush(Color.Crimson);
@@ -29,6 +33,8 @@
 
         //Global to hold the index of the start node, by default the startNode will be A (index 0)
         int startNodeIndex = 0;
+        //Counterpart for the destination node, used by dijkstra's algorithm
+        int endNodeIndex = 0;
 
         public GraphTraversalForm()
         {
@@ -180,14 +186,25 @@
                 //Check if this distance is less than or equal the circles radius, thus within the circle
                 if(radialDistance <= nodesCircles[i].Width / 2)
                 {
-                    //Change colour of previous start node selection back to red
-                    PaintUnvisited(startNodeIndex);
-                    //Assign global variable to the index of the start node 
-                    startNodeIndex = i;
-                    //Change the colour of the start node to green
-                    PaintVisited(startNodeIndex);
-                    //Change the prompt label text
-                    promptLabel.Text = "Choose a search...";
+                    //If it has been pressed, then will prompt the user to select a destination node 
+                    if (dijkstraButtonClicked)
+                    {
+                        //PaintUnvisited(endNodeIndex);
+                        endNodeIndex = i;
+                        PaintDestination(endNodeIndex);
+                        promptLabel.Text = "Click Dijkstra to start!";
+                    }
+                    else
+                    {
+                        //Change colour of previous start node selection back to red
+                        PaintUnvisited(startNodeIndex);
+                        //Assign global variable to the index of the start node 
+                        startNodeIndex = i;
+                        //Change the colour of the start node to green
+                        PaintVisited(startNodeIndex);
+                        //Change the prompt label text
+                        promptLabel.Text = "Choose a search...";
+                    }
                 }
             }
         }
@@ -204,6 +221,14 @@
         {
             Graphics g = graphPanel.CreateGraphics();
             g.FillEllipse(unvisitedBrush, nodesCircles[nodeIndex]);
+            g.DrawString(graph.NodeList[nodeIndex].Name, new Font(this.Font, FontStyle.Bold), blackBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y + 4);
+        }
+        //Paints the end node a different colour
+        private void PaintDestination(int nodeIndex)
+        {
+            Brush destinationBrush = new SolidBrush(Color.Aqua);
+            Graphics g = graphPanel.CreateGraphics();
+            g.FillEllipse(destinationBrush, nodesCircles[nodeIndex]);
             g.DrawString(graph.NodeList[nodeIndex].Name, new Font(this.Font, FontStyle.Bold), blackBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y + 4);
         }
         //Perform the Breadth-first search on the graph from the selected start index
@@ -344,6 +369,168 @@
             {
                 PaintUnvisited(i);
             }
+            //Reset this so the user can select a new start node 
+            dijkstraButtonClicked = false;
         }
+        //Perform Dijkstra's algorithm 
+        private void DijkstraButtonClick(object sender, EventArgs e)
+        {
+            //If its not true, then this is the first click so the user will be prompted to select a destination node, then try again
+            if (!dijkstraButtonClicked)
+            {
+                dijkstraButtonClicked = true;
+                promptLabel.Text = "Select a destination node";
+                return;
+            }
+            
+            //Otherwise, reset the boolean and perform the algorithm
+            dijkstraButtonClicked = false;
+
+            //Minimum heap to hold all nodes and their distance from the start node
+            MinHeap minHeap = new MinHeap();
+
+            //Dictionary to store nodes whos minimum distance from the start node is known (used in final route)
+            List<HeapNode> nodeStore = new List<HeapNode>();
+
+            //Fill heap with all nodes to begin
+            foreach (Node node in graph.NodeList)
+            {
+                //StartNode distance will be zero, all others will be infinity
+                if (node.Index == startNodeIndex)
+                {
+                    minHeap.Enqueue(node, 0);
+                }
+                else
+                {
+                    minHeap.Enqueue(node, int.MaxValue);
+                }
+            }
+
+            //Run until the heap is empty, meaning all nodes have a minimum distance from the start node
+            while (minHeap.NodeList.Count != 0)
+            {
+                //Temporary variable to hold the node removed from the heap
+                HeapNode dequeuedNode = minHeap.NodeList[0];
+
+                //Add the node to the list of nodes whos min distance is known
+                nodeStore.Add(dequeuedNode);
+
+                //Perform relaxation on this node, updating the heap of any new shorter distances found
+                Relaxation(minHeap, dequeuedNode);
+
+                //Paint dequeue'd node visited and paint its distance from the start node
+                PaintVisited(dequeuedNode.NodeElement.Index);
+                PaintDistance(dequeuedNode.NodeElement.Index, dequeuedNode.DistFromStart);
+
+                Debug.WriteLine($"Node dequeue'd : {dequeuedNode.NodeElement.Name}({dequeuedNode.NodeElement.Index}), distance : {dequeuedNode.DistFromStart}");
+
+                //Dequeue and perform heapify after the heap distances are updated
+                minHeap.Dequeue();
+            }
+
+            promptLabel.Text = "Route: ";
+
+            List<int> routeTaken = RetrieveRoute(nodeStore, startNodeIndex, endNodeIndex);
+            Debug.WriteLine(String.Join("=>", routeTaken));
+            for (int i = 0; i < routeTaken.Count; i++)
+            {
+                //Print the route to the label, ternary statement so we don't get a "=>" on the end
+                promptLabel.Text += i != routeTaken.Count - 1 ? $"{graph.NodeList[routeTaken[i]].Name} => " : $"{graph.NodeList[routeTaken[i]].Name}";
+            }
+            
+
+        }
+
+        //========================================================================================================//
+        //Dijkstra support methods
+
+        //Relaxation is performed on a node once it has been popped from the heap (its min distance is now known)
+        //  This function iterates through the node in questions edge list, checking if the nodes current distFromStart 
+        //  plus the edge weight is less than the current distance from start assigned to the destination node.
+        //  If it is less, then we update the heap with the new distance.
+        private static void Relaxation(MinHeap heap, HeapNode node)
+        {
+            //Loop through each edge in the nodes list
+            foreach (var edge in node.NodeElement.EdgeList)
+            {
+                int destinationNodeIndex = heap.HeapElementCheck(edge.Key.Name);
+
+                //Only analyse edges connected to nodes which remain in the heap, others are irrelevant
+                if (destinationNodeIndex != -1)
+                {
+                    //Check if current distance + edge weight < the current distance attached to that node
+                    if (node.DistFromStart + edge.Value < heap.NodeList[destinationNodeIndex].DistFromStart)
+                    {
+                        heap.UpdateNodeDistance(destinationNodeIndex, (node.DistFromStart + edge.Value));
+                    }
+                }
+            }
+        }
+
+        //Retrieves the optimal route from start node to end node using the nodeStore list formed during the algorithm.
+        //  Returns a list of the node indices in the order they were visited
+        private static List<int> RetrieveRoute(List<HeapNode> nodeStore, int startNodeIndex, int endNodeIndex)
+        {
+            //Initialise variable to hold the index of the end node in the list
+            int endNodeInStore = 0;
+
+            //Loop through all nodes
+            for (int i = 0; i < nodeStore.Count; i++)
+            {
+                //Find the end node in the list
+                if (nodeStore[i].NodeElement.Index == endNodeIndex)
+                {
+                    //Assign its proper index
+                    endNodeInStore = i;
+                }
+            }
+
+            //List to hold the route taken
+            List<int> indexList = new List<int>();
+
+            //Add the end node index to the list
+            indexList.Add(endNodeInStore);
+
+            //Placeholder node to track position in the nodeStore
+            HeapNode currentNode = nodeStore[endNodeInStore];
+
+            //Iterate backwards through the nodeStore from the end index
+            for (int i = endNodeInStore; i > 0; i--)
+            {
+                //Loop through all edges associated with this node
+                foreach (var edge in currentNode.NodeElement.EdgeList)
+                {
+                    //Find the edge connecting currentNode with the previous node in nodeStore, see if it was the correct distance
+                    if (edge.Key.Name == nodeStore[i - 1].NodeElement.Name && (currentNode.DistFromStart - edge.Value == nodeStore[i - 1].DistFromStart))
+                    {
+                        //Correct edge found, add the connecting node to the route and assign new currentNode
+                        currentNode = nodeStore[i - 1];
+                        indexList.Add(i - 1);
+                        break;
+                    }
+                }
+            }
+            //Reverse the list to get start -> finish
+            indexList.Reverse();
+            return indexList;
+        }
+
+        //Paint the distance from the start node above a node once it is removed from the heap
+        private void PaintDistance(int nodeIndex, int distFromStart)
+        {
+            Graphics g = graphPanel.CreateGraphics();
+            if(nodeIndex % 2 == 0)
+            {
+                g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y - 15);
+            }
+            else
+            {
+                g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y + 25);
+            }
+            
+
+        }
+
+        //========================================================================================================//
     }
 }
