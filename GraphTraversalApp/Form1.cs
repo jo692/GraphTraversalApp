@@ -15,7 +15,7 @@
         //Global variable to hold the graph 
         Graph graph = new Graph();
 
-        //Enables the GraphPanelPaintGraph function to execute upon the New Graph button being pressed
+        //Enables the GraphPanelPaintGraph function upon New Graph button being pressed
         bool newGraphButtonClicked = false;
         //If the dijkstra button is pressed, this will direct the flow of the program accordingly through the GraphPanelMouseClick function
         bool dijkstraButtonClicked = false;
@@ -56,7 +56,7 @@
             graphPanel.Refresh();
 
             //Change prompt label
-            promptLabel.Text = "Now click a start node";
+            promptLabel.Text = "Click a start node";
         }
         //Generate and illustrate a new random(ish) graph with between 7 - 10 nodes
         private void GraphPanelPaintGraph(object sender, PaintEventArgs e)
@@ -364,7 +364,7 @@
         //Reset the graph back to its unvisited state so another algorithm can be performed on it
         private void ResetGraphButtonClick(object sender, EventArgs e)
         {
-            promptLabel.Text = "Now choose a start node";
+            promptLabel.Text = "Choose a start node";
             for (int i = 0; i < graph.NoNodes; i++)
             {
                 PaintUnvisited(i);
@@ -426,6 +426,9 @@
 
                 //Dequeue and perform heapify after the heap distances are updated
                 minHeap.Dequeue();
+
+                //Artifical delay for enhanced visuals
+                Thread.Sleep(500);
             }
 
             promptLabel.Text = "Route: ";
@@ -519,13 +522,38 @@
         private void PaintDistance(int nodeIndex, int distFromStart)
         {
             Graphics g = graphPanel.CreateGraphics();
+
             if(nodeIndex % 2 == 0)
             {
-                g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y - 15);
+                //Adjust position slightly according to how many digits the distance is, ensures its centred. What to do about this repeated code?
+                if(distFromStart < 10)
+                {
+                    g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y - 15);
+                }
+                else if(distFromStart >= 10 && distFromStart < 100)
+                {
+                    g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X + 2, nodesCircles[nodeIndex].Y - 15);
+                }
+                else
+                {
+                    g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X - 1, nodesCircles[nodeIndex].Y - 15);
+                }
+                
             }
             else
             {
-                g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y + 25);
+                if (distFromStart < 10)
+                {
+                    g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X + 4, nodesCircles[nodeIndex].Y + 25);
+                }
+                else if (distFromStart >= 10 && distFromStart < 100)
+                {
+                    g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X + 2, nodesCircles[nodeIndex].Y + 25);
+                }
+                else
+                {
+                    g.DrawString(distFromStart.ToString(), new Font(this.Font, FontStyle.Bold), unvisitedBrush, nodesCircles[nodeIndex].X - 1, nodesCircles[nodeIndex].Y + 25);
+                }
             }
             
 
